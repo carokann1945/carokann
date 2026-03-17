@@ -1,6 +1,6 @@
-import Provider from '@/features/tracker/model/Provider';
+import TabProvider from '@/features/tracker/model/TabProvider';
 import React from 'react';
 
 export default function TrackerLayout({ children }: { children: React.ReactNode }) {
-  return <Provider>{children}</Provider>;
+  return <TabProvider>{children}</TabProvider>;
 }

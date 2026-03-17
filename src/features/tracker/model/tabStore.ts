@@ -22,15 +22,16 @@ const EMPTY_STATE: TabState = {
   activeTabId: null,
 };
 
-function normalizeState(payload: TabState | null | undefined): TabState {
-  const next = payload && payload.version === 1 ? payload : EMPTY_STATE;
-  const tabs = [...next.tabs].sort((a, b) => a.position - b.position);
-  const activeExists = tabs.some((tab) => tab.id === next.activeTabId);
+// 버전 검증, position으로 정렬, 활성화된 탭 유효성 체크
+function normalizeState(saved: TabState | null | undefined): TabState {
+  const validated = saved && saved.version === 1 ? saved : EMPTY_STATE;
+  const sorted = [...validated.tabs].sort((a, b) => a.position - b.position);
+  const activeExists = sorted.some((tab) => tab.id === validated.activeTabId);
 
   return {
-    ...next,
-    tabs,
-    activeTabId: activeExists ? next.activeTabId : (tabs[0]?.id ?? null),
+    ...validated,
+    tabs: sorted,
+    activeTabId: activeExists ? validated.activeTabId : (sorted[0]?.id ?? null),
   };
 }
 
@@ -51,13 +52,12 @@ export const useTabStore = create<TabStore>((set, get) => ({
 
   addTab: (name) =>
     set((store) => {
-      const nextName = name.trim() || '새 탭';
-      const newPosition =
-        store.state.tabs.length === 0 ? 0 : Math.max(...store.state.tabs.map((tab) => tab.position)) + 1;
+      const newName = name.trim() || '새 탭';
+      const newPosition = store.state.tabs.length;
 
       const newTab: Tab = {
         id: uid(),
-        name: nextName,
+        name: newName,
         position: newPosition,
       };
 
