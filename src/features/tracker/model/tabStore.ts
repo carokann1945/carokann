@@ -12,7 +12,7 @@ type TabStore = {
   addTab: (name: string) => void;
   renameTab: (tabId: string, name: string) => void;
   deleteTab: (tabId: string) => void;
-  reorderTabs: (nextOrderedIds: string[]) => void;
+  reorderTabs: (orderedIds: string[]) => void;
   setActiveTab: (tabId: string | null) => void;
 };
 
@@ -41,24 +41,15 @@ export const useTabStore = create<TabStore>((set, get) => ({
 
   hydrate: () => {
     if (get().hydrated) return;
-
-    const saved = loadState();
-
-    set({
-      state: normalizeState(saved),
-      hydrated: true,
-    });
+    set({ state: normalizeState(loadState()), hydrated: true });
   },
 
   addTab: (name) =>
     set((store) => {
-      const newName = name.trim() || '새 탭';
-      const newPosition = store.state.tabs.length;
-
       const newTab: Tab = {
         id: uid(),
-        name: newName,
-        position: newPosition,
+        name,
+        position: store.state.tabs.length,
       };
 
       return {
@@ -71,17 +62,12 @@ export const useTabStore = create<TabStore>((set, get) => ({
     }),
 
   renameTab: (tabId, name) =>
-    set((store) => {
-      const newName = name.trim();
-      if (!newName) return store;
-
-      return {
-        state: {
-          ...store.state,
-          tabs: store.state.tabs.map((tab) => (tab.id === tabId ? { ...tab, name: newName } : tab)),
-        },
-      };
-    }),
+    set((store) => ({
+      state: {
+        ...store.state,
+        tabs: store.state.tabs.map((tab) => (tab.id === tabId ? { ...tab, name } : tab)),
+      },
+    })),
 
   deleteTab: (tabId) =>
     set((store) => {
@@ -89,52 +75,25 @@ export const useTabStore = create<TabStore>((set, get) => ({
       const activeTabId = store.state.activeTabId === tabId ? (tabs[0]?.id ?? null) : store.state.activeTabId;
 
       return {
-        state: {
-          ...store.state,
-          tabs,
-          activeTabId,
-        },
+        state: { ...store.state, tabs, activeTabId },
       };
     }),
 
   reorderTabs: (orderedIds) =>
     set((store) => {
       const tabsById = new Map(store.state.tabs.map((tab) => [tab.id, tab]));
-      const reorderedTabs = orderedIds.map((tabId, index) => {
-        const tab = tabsById.get(tabId);
-        if (!tab) return null;
-        return { ...tab, position: index };
-      });
-
-      if (reorderedTabs.some((tab) => tab === null)) return store;
+      const reorderedTabs = orderedIds.map((tabId, index) => ({
+        ...tabsById.get(tabId)!,
+        position: index,
+      }));
 
       return {
-        state: {
-          ...store.state,
-          tabs: reorderedTabs.filter((tab): tab is Tab => tab !== null),
-        },
+        state: { ...store.state, tabs: reorderedTabs },
       };
     }),
 
   setActiveTab: (tabId) =>
-    set((store) => {
-      if (tabId === null) {
-        return {
-          state: {
-            ...store.state,
-            activeTabId: null,
-          },
-        };
-      }
-
-      const exists = store.state.tabs.some((tab) => tab.id === tabId);
-      if (!exists) return store;
-
-      return {
-        state: {
-          ...store.state,
-          activeTabId: tabId,
-        },
-      };
-    }),
+    set((store) => ({
+      state: { ...store.state, activeTabId: tabId },
+    })),
 }));

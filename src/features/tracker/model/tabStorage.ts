@@ -1,7 +1,7 @@
 'use client';
 
 import type { TabState } from './types';
-export const STORAGE_KEY = 'tabs-todolist:v1';
+export const STORAGE_KEY = 'reset-tracker:v1';
 
 export function loadState(): TabState | null {
   if (typeof window === 'undefined') return null;
@@ -13,11 +13,7 @@ export function loadState(): TabState | null {
     const parsed = JSON.parse(raw) as unknown;
     if (!parsed || typeof parsed !== 'object') return null;
 
-    const state = parsed as TabState;
-    if (state.version !== 1) return null;
-    if (!Array.isArray(state.tabs)) return null;
-
-    return state;
+    return parsed as TabState;
   } catch {
     return null;
   }
