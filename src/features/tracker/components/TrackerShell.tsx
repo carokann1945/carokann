@@ -1,10 +1,10 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import Sidebar from './sidebar/Sidebar';
-import Header from './Header';
 import { useResponsiveSidebar } from '../hooks/useResponsiveSidebar';
 import { useSidebarStore } from '../model/sidebarStore';
+import Header from './Header';
+import Sidebar from './sidebar/Sidebar';
 
 export default function TrackerShell() {
   useResponsiveSidebar();

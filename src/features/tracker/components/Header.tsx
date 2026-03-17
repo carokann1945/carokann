@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils';
 import { PanelLeft } from 'lucide-react';
-import { useTabStore, selectActiveTabName } from '../model/tabStore';
+import { cn } from '@/lib/utils';
 import { useSidebarStore } from '../model/sidebarStore';
+import { useTabStore, selectActiveTabName } from '../model/tabStore';
 
 export default function Header() {
   const activeTabName = useTabStore(selectActiveTabName);

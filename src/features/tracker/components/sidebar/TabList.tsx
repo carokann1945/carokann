@@ -15,15 +15,19 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useTabStore } from '../../model/tabStore';
 import { cn } from '@/lib/utils';
+import { useTabStore } from '../../model/tabStore';
 import TabItem from './TabItem';
 
 export default function TabList() {
-  const { state, reorderTabs } = useTabStore();
+  // tab 상태 꺼내오기
+  const state = useTabStore((store) => store.state);
+  const reorderTabs = useTabStore((store) => store.reorderTabs);
 
-  const tabs = [...state.tabs].sort((a, b) => a.position - b.position);
+  const tabs = state.tabs;
   const tabIds = tabs.map((tab) => tab.id);
+
+  // dnd-kit
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -36,7 +40,6 @@ export default function TabList() {
 
     const oldIndex = tabIds.findIndex((tabId) => tabId === active.id);
     const newIndex = tabIds.findIndex((tabId) => tabId === over.id);
-    if (oldIndex < 0 || newIndex < 0) return;
 
     reorderTabs(arrayMove(tabIds, oldIndex, newIndex));
   };

@@ -2,6 +2,9 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { GripVertical, MoreHorizontal } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import type { SubmitEventHandler, MouseEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -11,8 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import type { Tab } from '../../model/types';
-import { useTabStore } from '../../model/tabStore';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,10 +22,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { GripVertical, MoreHorizontal } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { SubmitEventHandler, MouseEvent } from 'react';
 import { useSidebarStore, handleTabSelect } from '../../model/sidebarStore';
+import { useTabStore } from '../../model/tabStore';
+import type { Tab } from '../../model/types';
 
 type TabItemProps = {
   tab: Tab;
