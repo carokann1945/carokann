@@ -1,9 +1,9 @@
-import { cn } from '@/lib/utils';
+import TrackerShell from '@/features/tracker/components/TrackerShell';
 
 export default function Home() {
   return (
     <>
-      <h1 className={cn('typo-3')}>Reset Tracker</h1>
+      <TrackerShell />
     </>
   );
 }

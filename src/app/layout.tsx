@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={`${pretendard.variable} ${geist.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased bg-silver-custom">{children}</body>
     </html>
   );
 }
