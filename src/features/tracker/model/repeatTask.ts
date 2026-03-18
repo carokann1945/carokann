@@ -20,12 +20,26 @@ export function computeCurrentCycle(task: RepeatTask, now = getNow(task.timezone
       return start.until(now, { largestUnit: 'days' }).days;
     case 'weekly':
       return Math.floor(start.until(now, { largestUnit: 'days' }).days / 7);
-    case 'monthly':
-      return start.until(now, { largestUnit: 'months' }).months;
-    case 'yearly':
-      return start.until(now, { largestUnit: 'years' }).years;
     case 'custom':
       return Math.floor(start.until(now, { largestUnit: 'days' }).days / (task.customIntervalDays ?? 1));
+    case 'monthly':
+      let cycleMonthly = start.until(now, { largestUnit: 'months' }).months;
+      while (Temporal.PlainDateTime.compare(start.add({ months: cycleMonthly + 1 }), now) <= 0) {
+        cycleMonthly++;
+      }
+      while (cycleMonthly > 0 && Temporal.PlainDateTime.compare(start.add({ months: cycleMonthly }), now) > 0) {
+        cycleMonthly--;
+      }
+      return cycleMonthly;
+    case 'yearly':
+      let cycleYearly = start.until(now, { largestUnit: 'years' }).years;
+      while (Temporal.PlainDateTime.compare(start.add({ years: cycleYearly + 1 }), now) <= 0) {
+        cycleYearly++;
+      }
+      while (cycleYearly > 0 && Temporal.PlainDateTime.compare(start.add({ years: cycleYearly }), now) > 0) {
+        cycleYearly--;
+      }
+      return cycleYearly;
   }
 }
 
