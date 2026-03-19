@@ -24,7 +24,9 @@ export default function Sidebar() {
       )}>
       {/* 사이트 로고 */}
       <div className={cn('w-full h-[40px]', 'flex justify-between items-center', 'mb-[20px]')}>
-        <div className={cn('w-[250px]', 'flex items-center gap-[8px]')}>
+        <div
+          className={cn('w-[250px]', 'flex items-center gap-[8px]', 'cursor-pointer')}
+          onClick={() => window.location.reload()}>
           <figure className={cn('w-[30px] h-[30px]', 'relative')}>
             <Image src="/images/cube.svg" alt="site logo" fill className={cn('object-cover')} />
           </figure>
