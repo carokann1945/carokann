@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { uid } from '@/lib/utils';
 import { loadState } from './tabStorage';
+import { useTaskStore } from './taskStore';
 import type { TabState, Tab } from './types';
 
 type TabStore = {
@@ -77,6 +78,8 @@ export const useTabStore = create<TabStore>((set, get) => ({
     set((store) => {
       const tabs = store.state.tabs.filter((tab) => tab.id !== tabId).map((tab, i) => ({ ...tab, position: i }));
       const activeTabId = store.state.activeTabId === tabId ? (tabs[0]?.id ?? null) : store.state.activeTabId;
+
+      useTaskStore.getState().deleteTasksByTab(tabId);
 
       return {
         state: { ...store.state, tabs, activeTabId },
