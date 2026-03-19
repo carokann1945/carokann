@@ -17,7 +17,7 @@ export default function Sidebar() {
         'flex flex-col',
         'p-[15px]',
         'fixed top-0 left-0',
-        'bg-white text-black border border-gray-200',
+        'bg-white text-black border-r border-gray-300',
         'translate-x-full',
         'transition-transform duration-300',
         isOpen ? 'translate-x-0' : '-translate-x-full',

@@ -14,7 +14,7 @@ export default function Header() {
         'z-10 min-h-[70px]',
         'flex items-center gap-[8px]',
         'pl-[16px] py-[18px]',
-        'bg-white text-black border border-gray-200',
+        'bg-white text-black border-b border-gray-300',
       )}>
       <div
         className={cn(
