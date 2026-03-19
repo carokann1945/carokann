@@ -1,4 +1,4 @@
-import { PanelLeft } from 'lucide-react';
+import { PanelLeft, CalendarCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSidebarStore } from '../model/sidebarStore';
 import { useTabStore, selectActiveTabName } from '../model/tabStore';
@@ -11,10 +11,10 @@ export default function Header() {
   return (
     <header
       className={cn(
-        'z-10 min-h-[70px]',
+        'z-10 w-full max-w-[1200px] min-h-[70px]',
         'flex items-center gap-[8px]',
-        'pl-[16px] py-[18px]',
-        'bg-white text-black border-b border-gray-300',
+        'px-[24px] pt-[24px] xl:px-[48px] xl:pt-[100px] mx-auto',
+        'bg-silver-custom',
       )}>
       <div
         className={cn(
@@ -27,7 +27,7 @@ export default function Header() {
         onClick={() => setIsOpen(!isOpen)}>
         <PanelLeft className={cn('w-[20px] h-[20px] text-gray-700')} />
       </div>
-      <h1 className={cn('typo-2')}>{activeTabName}</h1>
+      <h1 className={cn('typo-3 text-[24px] md:text-[32px] text-black-text')}>{activeTabName}</h1>
     </header>
   );
 }

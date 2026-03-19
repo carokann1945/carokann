@@ -53,7 +53,7 @@
   --color-accent-blue: #0ea5e9;
   --color-accent-hover: #0284c7;
   --color-accent-light: #e0f2fe;
-  --color-black-text: #2c2c2c;
+  --color-black-text: #495057;
   --color-sidebar-bg: #1a2b3d;
 
   --animate-blink-cursor: blink-cursor 1.2s step-end infinite;
@@ -170,8 +170,8 @@
 
 @utility typo-3 {
   font-family: var(--font-pretendard);
-  font-size: 20px;
+  font-size: 32px;
   line-height: 1;
   letter-spacing: 0;
-  font-weight: 700;
+  font-weight: 900;
 }
