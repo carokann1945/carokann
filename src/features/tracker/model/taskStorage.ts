@@ -1,9 +1,8 @@
-'use client';
+import type { TaskState } from './types';
 
-import type { TabState } from './types';
-export const STORAGE_KEY = 'reset-tracker-tabs:v1';
+export const STORAGE_KEY = 'reset-tracker-tasks:v1';
 
-export function loadState(): TabState | null {
+export function loadTaskState(): TaskState | null {
   if (typeof window === 'undefined') return null;
 
   try {
@@ -13,13 +12,13 @@ export function loadState(): TabState | null {
     const parsed = JSON.parse(raw) as unknown;
     if (!parsed || typeof parsed !== 'object') return null;
 
-    return parsed as TabState;
+    return parsed as TaskState;
   } catch {
     return null;
   }
 }
 
-export function saveState(state: TabState) {
+export function saveTaskState(state: TaskState) {
   if (typeof window === 'undefined') return;
 
   try {
