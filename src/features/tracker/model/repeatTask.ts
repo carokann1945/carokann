@@ -71,8 +71,9 @@ export function isAllCompleted(task: RepeatTask): boolean {
 // 동기화 함수 - RepeatTask 전용 체크박스 해제 로직
 export function syncRepeatTask(task: RepeatTask, now = getNow(task.timezone)): RepeatTask {
   const currentCycle = computeCurrentCycle(task, now);
+  const checksCorrupted = task.checks.length !== task.targetCount;
 
-  if (task.lastCycle === currentCycle) return task;
+  if (task.lastCycle === currentCycle && !checksCorrupted) return task;
 
   return {
     ...task,

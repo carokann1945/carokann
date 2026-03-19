@@ -25,7 +25,7 @@ function makeRepeatTask(overrides: Partial<RepeatTask> = {}): RepeatTask {
     checks: overrides.checks ?? Array(targetCount).fill(false),
     lastCycle: 0,
     position: 0,
-    updatedAt: 0,
+    updatedAt: '2025-03-01T00:00:00Z',
     ...overrides,
   };
 }
@@ -193,7 +193,8 @@ describe('syncRepeatTask', () => {
   });
 
   it('주기가 바뀌면 checks, completedAt, lastCycle, updatedAt을 갱신한다', () => {
-    vi.spyOn(Date, 'now').mockReturnValue(123456789);
+    const fixedInstant = Temporal.Instant.from('1970-01-02T10:17:36.789Z');
+    vi.spyOn(Temporal.Now, 'instant').mockReturnValue(fixedInstant);
     const task = makeRepeatTask({
       checks: [true, true, true],
       completedAt: '2025-03-01T10:00',
@@ -206,12 +207,13 @@ describe('syncRepeatTask', () => {
     expect(result.checks).toEqual([false, false, false]);
     expect(result.completedAt).toBeUndefined();
     expect(result.lastCycle).toBe(1);
-    expect(result.updatedAt).toBe(123456789);
+    expect(result.updatedAt).toBe(fixedInstant.toString());
     expect(result.title).toBe(task.title);
   });
 
   it('시작 전 시각이면 lastCycle을 -1로 맞춘다', () => {
-    vi.spyOn(Date, 'now').mockReturnValue(99);
+    const fixedInstant = Temporal.Instant.from('1970-01-01T00:00:00.099Z');
+    vi.spyOn(Temporal.Now, 'instant').mockReturnValue(fixedInstant);
     const task = makeRepeatTask({
       checks: [true, true, false],
       lastCycle: 0,
@@ -221,7 +223,7 @@ describe('syncRepeatTask', () => {
 
     expect(result.lastCycle).toBe(-1);
     expect(result.checks).toEqual([false, false, false]);
-    expect(result.updatedAt).toBe(99);
+    expect(result.updatedAt).toBe(fixedInstant.toString());
   });
 });
 

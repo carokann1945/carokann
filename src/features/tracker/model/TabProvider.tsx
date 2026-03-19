@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useTabStore } from './tabStore';
 import { saveState } from './tabStorage';
+import { useTabStore } from './tabStore';
 
 export default function TabProvider({ children }: { children: React.ReactNode }) {
   const hydrate = useTabStore((store) => store.hydrate);
