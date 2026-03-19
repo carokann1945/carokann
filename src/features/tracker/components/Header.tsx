@@ -13,7 +13,7 @@ export default function Header() {
       className={cn(
         'z-10 w-full max-w-[1200px] min-h-[70px]',
         'flex items-center gap-[8px]',
-        'px-[24px] pt-[24px] xl:px-[48px] xl:pt-[100px] mx-auto',
+        'px-[24px] pt-[24px] xl:px-[48px] xl:pt-[100px] mx-auto mb-[20px]',
         'bg-silver-custom',
       )}>
       <div

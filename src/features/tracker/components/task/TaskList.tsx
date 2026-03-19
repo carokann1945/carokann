@@ -15,6 +15,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useTabStore } from '../../model/tabStore';
 import { useTaskStore } from '../../model/taskStore';
@@ -51,11 +52,15 @@ export default function TaskList() {
     return (
       <div
         className={cn(
-          'max-w-[1000px]',
-          'rounded-xl border border-dashed border-gray-500 bg-white px-[20px] py-[32px]',
+          'max-w-[1110px]',
+          'flex flex-col gap-[12px] items-center md:gap-[24px]',
+          'rounded-xl shadow-xl bg-white px-[20px] py-[32px]',
           'text-center text-gray-500',
           'mx-auto',
         )}>
+        <figure className={cn('relative w-[250px] h-[250px] md:w-[400px] md:h-[400px]')}>
+          <Image src="/images/checklist.png" alt="have no tasks image" sizes="400px" fill className="object-cover" />
+        </figure>
         <p className={cn('typo-2 text-gray-700')}>표시할 작업이 없습니다.</p>
         <p className={cn('mt-[6px] text-sm')}>탭을 선택하거나 새 탭을 만들어 작업을 시작하세요.</p>
       </div>
@@ -66,12 +71,16 @@ export default function TaskList() {
     return (
       <div
         className={cn(
-          'max-w-[1000px]',
-          'rounded-xl border border-dashed border-gray-500 bg-white px-[20px] py-[32px]',
+          'max-w-[1110px]',
+          'flex flex-col gap-[12px] items-center md:gap-[24px]',
+          'rounded-xl shadow-xl bg-white px-[20px] py-[32px]',
           'text-center text-gray-500',
           'mx-auto',
         )}>
-        <p className={cn('typo-2 text-gray-700')}>아직 작업이 없습니다.</p>
+        <figure className={cn('relative w-[250px] h-[250px] md:w-[400px] md:h-[400px]')}>
+          <Image src="/images/checklist.png" alt="have no tasks image" sizes="400px" fill className="object-cover" />
+        </figure>
+        <p className={cn('typo-3 text-gray-700')}>아직 작업이 없습니다.</p>
         <p className={cn('mt-[6px] text-sm')}>상단 +create 버튼으로 첫 작업을 추가해보세요.</p>
       </div>
     );
@@ -81,7 +90,13 @@ export default function TaskList() {
     <div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-          <ul className={cn('space-y-[8px]')}>
+          <ul
+            className={cn(
+              'max-w-[1110px]',
+              'flex flex-col gap-[8px]',
+              'rounded-xl shadow-xl bg-white px-[20px] py-[32px]',
+              'mx-auto',
+            )}>
             {tasks.map((task) => (
               <TaskItem key={task.id} task={task} />
             ))}
