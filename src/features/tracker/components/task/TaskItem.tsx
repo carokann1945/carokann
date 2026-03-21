@@ -24,6 +24,7 @@ export default function TaskItem({ task }: { task: Task }) {
 
   const toggleSimpleCheck = useTaskStore((store) => store.toggleSimpleCheck);
   const toggleRepeatCheck = useTaskStore((store) => store.toggleRepeatCheck);
+  const deleteTask = useTaskStore((store) => store.deleteTask);
 
   // note 오픈 관리용 상태
   const [isNoteOpen, setIsNoteOpen] = useState(false);
@@ -151,7 +152,10 @@ export default function TaskItem({ task }: { task: Task }) {
               aria-label={`${task.title} 삭제`}
               onPointerDown={stopPropagation}
               onKeyDown={stopPropagation}
-              onClick={stopPropagation}
+              onClick={(e) => {
+                stopPropagation(e);
+                deleteTask(task.id);
+              }}
               className={cn('flex h-[18px] w-[18px] items-center justify-center text-gray-400 hover:text-gray-600')}>
               <Trash2 className={cn('h-[14px] w-[14px]')} />
             </button>
