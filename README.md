@@ -6,7 +6,7 @@
 
 ## 배포 링크 / 깃허브 링크
 
-- 배포 링크: 준비 중
+- 배포 링크: https://carokann.app
 - GitHub: https://github.com/carokann1945/carokann
 
 ## 대표 이미지 또는 GIF
