@@ -412,7 +412,7 @@ export default function TaskDialog({
                 type="text"
                 value={formState.title}
                 onChange={(event) => updateField('title', event.target.value)}
-                placeholder="태스크 이름을 입력하세요"
+                placeholder="작업 이름을 입력하세요"
                 className={cn(
                   'w-full h-[40px] sm:h-[56px] rounded-xl border border-[#cbc6bb] bg-white px-[16px] text-[16px] text-black-text outline-none',
                   'placeholder:text-black-text/55 focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20',
