@@ -3,7 +3,6 @@
 import { create } from 'zustand';
 import { uid } from '@/lib/utils';
 import { loadState } from './tabStorage';
-import { useTaskStore } from './taskStore';
 import type { TabState, Tab } from './types';
 
 type TabStore = {
@@ -13,7 +12,7 @@ type TabStore = {
   addTab: (name: string) => void;
   renameTab: (tabId: string, name: string) => void;
   deleteTab: (tabId: string) => void;
-  restoreTab: (tab: Tab) => void;
+  restoreTab: (tab: Tab, activate?: boolean) => void;
   reorderTabs: (orderedIds: string[]) => void;
   setActiveTab: (tabId: string | null) => void;
 };
@@ -80,17 +79,20 @@ export const useTabStore = create<TabStore>((set, get) => ({
       const tabs = store.state.tabs.filter((tab) => tab.id !== tabId).map((tab, i) => ({ ...tab, position: i }));
       const activeTabId = store.state.activeTabId === tabId ? (tabs[0]?.id ?? null) : store.state.activeTabId;
 
-      useTaskStore.getState().deleteTasksByTab(tabId);
-
       return {
         state: { ...store.state, tabs, activeTabId },
       };
     }),
 
-  restoreTab: (tab) =>
+  restoreTab: (tab, activate = true) =>
     set((store) => {
-      const tabs = [...store.state.tabs, tab].sort((a, b) => a.position - b.position);
-      return { state: { ...store.state, tabs } };
+      if (store.state.tabs.some((t) => t.id === tab.id)) return store;
+      const tabs = store.state.tabs
+        .map((t) => (t.position >= tab.position ? { ...t, position: t.position + 1 } : t))
+        .concat(tab)
+        .sort((a, b) => a.position - b.position);
+      const activeTabId = activate ? tab.id : store.state.activeTabId;
+      return { state: { ...store.state, tabs, activeTabId } };
     }),
 
   reorderTabs: (orderedIds) =>

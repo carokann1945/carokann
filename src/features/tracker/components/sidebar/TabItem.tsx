@@ -17,7 +17,7 @@ type TabItemProps = {
 };
 
 export default function TabItem({ tab }: TabItemProps) {
-  const { state, renameTab, deleteTab } = useTabStore();
+  const { state, renameTab } = useTabStore();
   const isActive = state.activeTabId === tab.id;
   const [tabDialogOpen, setTabDialogOpen] = useState(false);
   const { handleDelete } = useDeleteTab();

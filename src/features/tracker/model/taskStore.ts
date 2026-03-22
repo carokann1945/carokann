@@ -204,14 +204,28 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
   restoreTask: (task) =>
     set((store) => {
-      const tasks = [...store.state.tasks, task].sort((a, b) => a.position - b.position);
+      if (store.state.tasks.some((t) => t.id === task.id)) return store;
+
+      const tasks = store.state.tasks
+        .map((t) => (t.tabId === task.tabId && t.position >= task.position ? { ...t, position: t.position + 1 } : t))
+        .concat(task)
+        .sort((a, b) => a.position - b.position);
+
       return { state: { ...store.state, tasks } };
     }),
 
   restoreTasksByTab: (tasks) =>
     set((store) => {
-      const merged = [...store.state.tasks, ...tasks].sort((a, b) => a.position - b.position);
-      return { state: { ...store.state, tasks: merged } };
+      const existingIds = new Set(store.state.tasks.map((t) => t.id));
+      const toRestore = tasks.filter((t) => !existingIds.has(t.id));
+      if (!toRestore.length) return store;
+
+      return {
+        state: {
+          ...store.state,
+          tasks: [...store.state.tasks, ...toRestore].sort((a, b) => a.position - b.position),
+        },
+      };
     }),
 
   toggleSimpleCheck: (taskId) =>

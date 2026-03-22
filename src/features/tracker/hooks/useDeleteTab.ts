@@ -6,11 +6,14 @@ import type { Tab } from '../model/types';
 export function useDeleteTab() {
   const deleteTab = useTabStore((store) => store.deleteTab);
   const restoreTab = useTabStore((store) => store.restoreTab);
+  const deleteTasksByTab = useTaskStore((store) => store.deleteTasksByTab);
   const restoreTasksByTab = useTaskStore((store) => store.restoreTasksByTab);
 
   const handleDelete = (tab: Tab) => {
     const displayName = tab.name.length > 15 ? `${tab.name.slice(0, 15)}...` : tab.name;
     const deletedTasks = useTaskStore.getState().state.tasks.filter((t) => t.tabId === tab.id);
+
+    deleteTasksByTab(tab.id);
     deleteTab(tab.id);
 
     toast(`${displayName} - 삭제됨`, {
