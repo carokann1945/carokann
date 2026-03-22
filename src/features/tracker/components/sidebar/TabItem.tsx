@@ -5,6 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useDeleteTab } from '../../hooks/useDeleteTab';
 import { handleTabSelect } from '../../model/sidebarStore';
 import { useTabStore } from '../../model/tabStore';
 import type { Tab } from '../../model/types';
@@ -19,6 +20,7 @@ export default function TabItem({ tab }: TabItemProps) {
   const { state, renameTab, deleteTab } = useTabStore();
   const isActive = state.activeTabId === tab.id;
   const [tabDialogOpen, setTabDialogOpen] = useState(false);
+  const { handleDelete } = useDeleteTab();
 
   // dnd-kit
   const { attributes, listeners, setActivatorNodeRef, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -65,7 +67,7 @@ export default function TabItem({ tab }: TabItemProps) {
         <TabDropdownMenu
           tabName={tab.name}
           onRename={() => setTabDialogOpen(true)}
-          onDelete={() => deleteTab(tab.id)}
+          onDelete={() => handleDelete(tab)}
         />
       </li>
       {tabDialogOpen && (

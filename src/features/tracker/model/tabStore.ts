@@ -13,6 +13,7 @@ type TabStore = {
   addTab: (name: string) => void;
   renameTab: (tabId: string, name: string) => void;
   deleteTab: (tabId: string) => void;
+  restoreTab: (tab: Tab) => void;
   reorderTabs: (orderedIds: string[]) => void;
   setActiveTab: (tabId: string | null) => void;
 };
@@ -84,6 +85,12 @@ export const useTabStore = create<TabStore>((set, get) => ({
       return {
         state: { ...store.state, tabs, activeTabId },
       };
+    }),
+
+  restoreTab: (tab) =>
+    set((store) => {
+      const tabs = [...store.state.tabs, tab].sort((a, b) => a.position - b.position);
+      return { state: { ...store.state, tabs } };
     }),
 
   reorderTabs: (orderedIds) =>

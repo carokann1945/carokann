@@ -18,7 +18,7 @@ export default function TaskProvider({ children }: { children: React.ReactNode }
     saveTaskState(state);
   }, [state, hydrated]);
 
-  // 30초마다 sync, 브라우저의 다른 탭에 갔다오면 sync
+  // 5초마다 sync, 브라우저의 다른 탭에 갔다오면 sync
   useEffect(() => {
     if (!hydrated) return;
 
@@ -29,7 +29,7 @@ export default function TaskProvider({ children }: { children: React.ReactNode }
     };
 
     document.addEventListener('visibilitychange', handleVisibility);
-    const id = setInterval(() => useTaskStore.getState().syncTasks(), 30_000);
+    const id = setInterval(() => useTaskStore.getState().syncTasks(), 5_000);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);
