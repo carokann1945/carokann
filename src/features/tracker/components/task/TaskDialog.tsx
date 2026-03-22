@@ -1,7 +1,7 @@
 import { Temporal } from '@js-temporal/polyfill';
 import { ChevronDown, CircleHelp, X } from 'lucide-react';
 import { Dialog as DialogPrimitive } from 'radix-ui';
-import { useRef, useState, type ChangeEvent, SubmitEventHandler } from 'react';
+import { useRef, useState, type ChangeEvent, type SubmitEventHandler } from 'react';
 import { cn, getBrowserTimezone } from '@/lib/utils';
 import type { TaskDraft, IntervalPreset } from '../../model/types';
 
@@ -9,6 +9,13 @@ const MAX_TARGET_COUNT = 10;
 const MIN_TARGET_COUNT = 1;
 const DEFAULT_TARGET_COUNT = 1;
 const DEFAULT_INTERVAL_DAYS = '1';
+const TIMEZONE_HELP_FALLBACK = 'Asia/Seoul';
+const TIMEZONE_HELP_ID = 'task-timezone-help';
+const TIMEZONE_HELP_PLAIN_TITLE = 'Plain (표준 시간대 없음)';
+const TIMEZONE_HELP_PLAIN_DESCRIPTION =
+  "설정한 '시간의 숫자' 자체만 기억합니다. 예를 들어 '매일 밤 12시'로 설정했다면, 한국에 있든 미국으로 여행을 가든 항상 유저가 위치한 현지 시계가 밤 12시를 가리킬 때 초기화됩니다. 해외에 자주 나가지 않는 일반적인 환경에서 가장 직관적이고 오류가 없는 권장 옵션입니다.";
+const TIMEZONE_HELP_BROWSER_DESCRIPTION =
+  "설정할 당시의 '절대적인 시점'을 기준으로 삼습니다. 예를 들어 한국에서 '밤 12시'로 설정한 뒤 미국으로 이동하면, 미국의 밤 12시가 아니라 '한국 시간으로 밤 12시에 해당하는 시점(미국 시간으로는 낮)'에 초기화가 발생합니다. 해외 이동 시에도 원래 생활하던 국가의 시간에 맞춰 정확하게 동작해야 할 때 사용합니다.";
 
 type TaskDialogProps = {
   open: boolean;
@@ -79,6 +86,11 @@ function createInitialFormState(): TaskFormState {
 function parsePositiveInteger(value: string) {
   if (!/^\d+$/.test(value)) return null;
   return Number.parseInt(value, 10);
+}
+
+function supportsHoverTooltip() {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+  return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 }
 // 폼 상태를 실제 저장할 데이터로 변환
 function buildTaskDraft(formState: TaskFormState): TaskDraft | null {
@@ -224,10 +236,14 @@ export default function TaskDialog({
     isEditMode === 'update' ? '작업을 수정하는 다이얼로그입니다.' : '새 작업을 추가하는 다이얼로그입니다.';
 
   const [browserTimezone] = useState(getBrowserTimezone);
+  const [isTimezoneHelpOpen, setIsTimezoneHelpOpen] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const draft = buildTaskDraft(formState);
   const isRepeat = formState.kind === 'repeat';
   const showCustomIntervalInput = isRepeat && formState.intervalPreset === 'custom';
+  const showTimezoneHelp = isRepeat && isTimezoneHelpOpen;
+  const timezoneHelpExample = browserTimezone && browserTimezone !== 'plain' ? browserTimezone : TIMEZONE_HELP_FALLBACK;
+  const timezoneHelpBrowserTitle = `브라우저 시간대 (예: ${timezoneHelpExample})`;
 
   // 타임존 선택 옵션. browserTimezone 가져올때 에러나면 plain으로 적용시킴
   const timezoneOptions = (() => {
@@ -248,6 +264,9 @@ export default function TaskDialog({
   })();
 
   const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      setIsTimezoneHelpOpen(false);
+    }
     onOpenChange(nextOpen);
   };
 
@@ -288,6 +307,43 @@ export default function TaskDialog({
 
     onSubmit(draft);
     handleOpenChange(false);
+  };
+
+  const openTimezoneHelp = () => {
+    setIsTimezoneHelpOpen(true);
+  };
+
+  const closeTimezoneHelp = () => {
+    setIsTimezoneHelpOpen(false);
+  };
+
+  const handleTimezoneHelpMouseEnter = () => {
+    if (supportsHoverTooltip()) {
+      openTimezoneHelp();
+    }
+  };
+
+  const handleTimezoneHelpMouseLeave = () => {
+    if (supportsHoverTooltip()) {
+      closeTimezoneHelp();
+    }
+  };
+
+  const handleTimezoneHelpFocus = () => {
+    if (supportsHoverTooltip()) {
+      openTimezoneHelp();
+    }
+  };
+
+  const handleTimezoneHelpBlur = () => {
+    if (supportsHoverTooltip()) {
+      closeTimezoneHelp();
+    }
+  };
+
+  const handleTimezoneHelpClick = () => {
+    if (supportsHoverTooltip()) return;
+    setIsTimezoneHelpOpen((prev) => !prev);
   };
 
   return (
@@ -336,7 +392,12 @@ export default function TaskDialog({
             <SegmentedButtonGroup
               value={formState.kind}
               options={TASK_KIND_OPTIONS}
-              onChange={(value) => updateField('kind', value)}
+              onChange={(value) => {
+                if (value !== 'repeat') {
+                  closeTimezoneHelp();
+                }
+                updateField('kind', value);
+              }}
               className={cn('grid grid-cols-2 gap-[6px] rounded-[16px] bg-[#f3f0e7] p-[4px]')}
               buttonClassName="sm:min-h-[52px] justify-center"
             />
@@ -403,11 +464,56 @@ export default function TaskDialog({
                 </div>
 
                 <div className={cn('flex flex-col gap-[6px] sm:gap-[12px]')}>
-                  <div className={cn('flex items-center gap-[6px]')}>
+                  <div className={cn('relative flex items-center gap-[6px]')}>
                     <label htmlFor="task-timezone" className={cn('text-[16px] font-[600] text-black-text')}>
                       표준 시간대
                     </label>
-                    <CircleHelp className="h-[17px] w-[17px] text-black-text/45" />
+                    <button
+                      type="button"
+                      aria-label="표준 시간대 도움말"
+                      aria-controls={TIMEZONE_HELP_ID}
+                      aria-describedby={isTimezoneHelpOpen ? TIMEZONE_HELP_ID : undefined}
+                      aria-expanded={isTimezoneHelpOpen}
+                      onMouseEnter={handleTimezoneHelpMouseEnter}
+                      onMouseLeave={handleTimezoneHelpMouseLeave}
+                      onFocus={handleTimezoneHelpFocus}
+                      onBlur={handleTimezoneHelpBlur}
+                      onClick={handleTimezoneHelpClick}
+                      className={cn(
+                        'relative z-[1] h-[22px] w-[22px] rounded-full bg-white text-black-text/45 transition-colors',
+                        'flex items-center justify-center',
+                        'hover:border-[#a79f90] hover:text-black-text/75',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-blue/30',
+                      )}>
+                      <CircleHelp className="h-[16px] w-[16px]" />
+                    </button>
+                    {showTimezoneHelp && (
+                      <div
+                        id={TIMEZONE_HELP_ID}
+                        role="tooltip"
+                        className={cn(
+                          'pointer-events-none absolute left-0 top-0 z-10 w-[min(320px,calc(100vw-60px))]',
+                          '-translate-y-[calc(100%+20px)] rounded-[18px] border border-[#d8d1c3] bg-white px-[14px] py-[14px]',
+                          'shadow-[0_14px_32px_rgba(0,0,0,0.12)]',
+                        )}>
+                        <div className="absolute left-[82px] top-full h-[14px] w-[14px] -translate-y-1/2 rotate-45 border-b border-r border-[#d8d1c3] bg-white" />
+                        <div className={cn('flex flex-col gap-[10px] text-left')}>
+                          <div className={cn('flex flex-col gap-[4px]')}>
+                            <p className={cn('text-[15px] font-[800] text-black-text')}>{TIMEZONE_HELP_PLAIN_TITLE}</p>
+                            <p className={cn('text-[14px] leading-[1.55] text-black-text/72')}>
+                              {TIMEZONE_HELP_PLAIN_DESCRIPTION}
+                            </p>
+                          </div>
+                          <div className="border-t border-[#ece6d9]" />
+                          <div className={cn('flex flex-col gap-[4px]')}>
+                            <p className={cn('text-[15px] font-[800] text-black-text')}>{timezoneHelpBrowserTitle}</p>
+                            <p className={cn('text-[14px] leading-[1.55] text-black-text/72')}>
+                              {TIMEZONE_HELP_BROWSER_DESCRIPTION}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className={cn('relative')}>
                     <select

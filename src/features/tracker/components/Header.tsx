@@ -35,17 +35,6 @@ export default function Header() {
           'px-[24px] pt-[70px] xl:px-[48px] xl:pt-[100px] mx-auto mb-[20px]',
           'bg-silver-custom',
         )}>
-        {/* <div
-          className={cn(
-            'w-[30px] h-[30px] rounded-md',
-            'flex justify-center items-center',
-            'cursor-pointer hover:bg-gray-100',
-            'transition-color duration-100',
-            isOpen ? 'hidden' : '',
-          )}
-          onClick={() => setIsOpen(!isOpen)}>
-          <PanelLeft className={cn('w-[20px] h-[20px] text-gray-700')} />
-        </div> */}
         <h1 className={cn('typo-3 text-[24px] md:text-[32px] text-black-text')}>
           {activeTab?.name ?? '선택된 탭 없음'}
         </h1>
