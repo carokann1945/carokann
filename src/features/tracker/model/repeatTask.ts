@@ -152,15 +152,15 @@ export function formatNextReset(task: RepeatTask) {
 
 // 완료 날짜 포맷팅
 export function formatCompletedAt(completedAt?: string) {
-  if (!completedAt) return '-';
+  if (!completedAt) return null;
 
   try {
     const timezone = getBrowserTimezone();
     const local = Temporal.Instant.from(completedAt).toZonedDateTimeISO(timezone);
 
-    return `${formatTwoDigit(local.month)}/${formatTwoDigit(local.day)}`;
+    return `완료 - ${formatTwoDigit(local.month)}/${formatTwoDigit(local.day)}`;
   } catch {
-    return '-';
+    return null;
   }
 }
 
