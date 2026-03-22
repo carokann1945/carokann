@@ -54,15 +54,17 @@ export default function TaskList() {
         className={cn(
           'max-w-[1110px]',
           'flex flex-col gap-[12px] items-center md:gap-[24px]',
-          'rounded-xl shadow-xl bg-white px-[20px] py-[32px]',
-          'text-center text-gray-500',
+          'rounded-xl shadow-xl bg-white px-[20px] py-[32px] border border-gray-300',
+          'text-center',
           'mx-auto',
         )}>
-        <figure className={cn('relative w-[250px] h-[250px] md:w-[400px] md:h-[400px]')}>
-          <Image src="/images/checklist.png" alt="have no tasks image" sizes="400px" fill className="object-cover" />
+        <figure className={cn('relative w-[180px] h-[290px] md:w-[230px] md:h-[370px]')}>
+          <Image src="/images/herb.png" alt="have no tasks image" sizes="400px" fill className="object-cover" />
         </figure>
-        <p className={cn('typo-2 text-gray-700')}>표시할 작업이 없습니다.</p>
-        <p className={cn('mt-[6px] text-sm')}>탭을 선택하거나 새 탭을 만들어 작업을 시작하세요.</p>
+        <p className={cn('typo-first text-[26px] md:text-[32px] text-custom-black')}>선택된 탭이 없습니다.</p>
+        <p className={cn('typo-common text-[14px] md:text-[16px] mt-[6px] text-custom-black-light')}>
+          탭을 선택하거나 새 탭을 만들어 작업을 시작하세요.
+        </p>
       </div>
     );
   }
@@ -73,15 +75,17 @@ export default function TaskList() {
         className={cn(
           'max-w-[1110px]',
           'flex flex-col gap-[12px] items-center md:gap-[24px]',
-          'rounded-xl shadow-xl bg-white px-[20px] py-[32px]',
-          'text-center text-gray-500',
+          'rounded-xl shadow-xl bg-white px-[20px] py-[32px] border border-gray-300',
+          'text-center',
           'mx-auto',
         )}>
-        <figure className={cn('relative w-[250px] h-[250px] md:w-[400px] md:h-[400px]')}>
-          <Image src="/images/checklist.png" alt="have no tasks image" sizes="400px" fill className="object-cover" />
+        <figure className={cn('relative w-[180px] h-[290px] md:w-[230px] md:h-[370px]')}>
+          <Image src="/images/herb.png" alt="have no tasks image" sizes="400px" fill className="object-cover" />
         </figure>
-        <p className={cn('typo-3 text-gray-700')}>아직 작업이 없습니다.</p>
-        <p className={cn('mt-[6px] text-sm')}>상단 +추가 버튼으로 첫 작업을 추가해보세요.</p>
+        <p className={cn('typo-first text-[26px] md:text-[32px] text-custom-black')}>아직 작업이 없습니다.</p>
+        <p className={cn('typo-common text-[14px] md:text-[16px] mt-[6px] text-custom-black-light')}>
+          상단 +추가 버튼으로 첫 작업을 추가해보세요.
+        </p>
       </div>
     );
   }
@@ -93,8 +97,8 @@ export default function TaskList() {
           <ul
             className={cn(
               'max-w-[1110px]',
-              'flex flex-col gap-[8px]',
-              'rounded-xl shadow-xl bg-white px-[16px] md:px-[32px] py-[16px] md:py-[32px]',
+              'flex flex-col gap-[12px]',
+              'rounded-xl shadow-xl bg-white px-[16px] md:px-[32px] py-[16px] md:py-[32px] border border-gray-300',
               'mx-auto',
             )}>
             {tasks.map((task) => (

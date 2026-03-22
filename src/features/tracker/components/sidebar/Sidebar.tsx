@@ -44,7 +44,7 @@ export default function Sidebar() {
         className={cn(
           'w-full',
           'flex flex-col gap-[12px] items-center',
-          'mb-[30px] py-[16px] px-[40px]',
+          'mb-[32px] py-[16px] px-[40px]',
           'border border-gray-500 rounded-lg',
         )}>
         <CircleUser className={cn('w-[45px] h-[45px] text-gray-300')} />

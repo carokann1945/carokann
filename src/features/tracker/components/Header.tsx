@@ -35,7 +35,7 @@ export default function Header() {
           'px-[24px] pt-[70px] xl:px-[48px] xl:pt-[100px] mx-auto mb-[20px]',
           'bg-silver-custom',
         )}>
-        <h1 className={cn('typo-3 text-[24px] md:text-[32px] text-black-text')}>
+        <h1 className={cn('typo-first text-[24px] md:text-[32px] text-custom-black')}>
           {activeTab?.name ?? '선택된 탭 없음'}
         </h1>
         <button
@@ -47,9 +47,10 @@ export default function Header() {
           }}
           className={cn(
             'rounded-lg px-[12px] py-[12px]',
-            'typo-1 text-[14px] text-white',
+            'border border-gray-300',
+            'typo-1 text-[14px] text-custom-black-light',
             'transition-color duration-100',
-            activeTab ? 'cursor-pointer bg-accent-blue hover:bg-accent-hover' : 'cursor-not-allowed bg-gray-300',
+            activeTab ? 'cursor-pointer hover:bg-custom-sidebar-hover' : 'cursor-not-allowed bg-gray-300',
           )}>
           + 추가
         </button>
