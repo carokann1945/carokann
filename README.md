@@ -11,7 +11,10 @@
 
 ## 대표 이미지 또는 GIF
 
-- 추가 예정
+<p align="center">
+  <img src="./public/preview/desktop1.png" alt="Carokann 메인 화면 데스크톱 1" width="49%" />
+  <img src="./public/preview/desktop2.png" alt="Carokann 메인 화면 데스크톱 2" width="49%" />
+</p>
 
 ## 주요 기능
 
