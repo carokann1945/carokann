@@ -57,6 +57,12 @@
   --color-sidebar-bg: #1a2b3d;
   --color-success: #51cf66;
   --color-error: #ff6b6b;
+  --color-custom-sidebar-bg: #faf9f4;
+  --color-custom-black: #141413;
+  --color-custom-black-light: #5a5a57;
+  --color-custom-sidebar-hover: #e8e5da;
+  --color-custom-sidebar-hover-dark: #b5cdc8;
+  --color-custom-main-bg: #faf9f5;
 
   --animate-blink-cursor: blink-cursor 1.2s step-end infinite;
   @keyframes blink-cursor {
@@ -152,6 +158,38 @@
   html {
     @apply font-pretendard;
   }
+}
+
+@utility typo-first {
+  font-family: var(--font-pretendard);
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: 0;
+  font-weight: 900;
+}
+
+@utility typo-second {
+  font-family: var(--font-pretendard);
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: 0;
+  font-weight: 600;
+}
+
+@utility typo-common {
+  font-family: var(--font-pretendard);
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+@utility typo-small {
+  font-family: var(--font-pretendard);
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0;
+  font-weight: 400;
 }
 
 @utility typo-1 {

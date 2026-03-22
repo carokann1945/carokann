@@ -1,5 +1,4 @@
 import { PanelLeft, CircleUser, LogIn, FolderOpen } from 'lucide-react';
-import SvgBluecube from '@/components/svgs/Bluecube';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useSidebarStore } from '../../model/sidebarStore';
@@ -15,9 +14,9 @@ export default function Sidebar() {
       className={cn(
         'z-20 w-[300px] h-screen',
         'flex flex-col',
-        'p-[15px]',
+        'px-[15px] py-[4px]',
         'fixed top-0 left-0',
-        'bg-sidebar-bg text-white',
+        'bg-[#faf9f4] text-custom-black border-r border-gray-300',
         'translate-x-full',
         'transition-transform duration-300',
         isOpen ? 'translate-x-0' : '-translate-x-full',
@@ -25,12 +24,9 @@ export default function Sidebar() {
       {/* 사이트 로고 */}
       <div className={cn('w-full h-[40px]', 'flex justify-between items-center', 'mb-[30px]')}>
         <div
-          className={cn('w-[165px]', 'flex items-center gap-[8px]', 'cursor-pointer')}
+          className={cn('w-[120px]', 'flex items-center gap-[8px]', 'cursor-pointer')}
           onClick={() => window.location.reload()}>
-          <figure className={cn('w-[30px] h-[30px]', 'relative')}>
-            <SvgBluecube className="h-full w-full text-white" />
-          </figure>
-          <h1 className={cn('typo-2')}>Reset Tracker</h1>
+          <h1 className={cn('typo-second')}>Carokann</h1>
         </div>
         <div
           className={cn(
@@ -52,14 +48,14 @@ export default function Sidebar() {
           'border border-gray-500 rounded-lg',
         )}>
         <CircleUser className={cn('w-[45px] h-[45px] text-gray-300')} />
-        <h2 className="typo-1 text-white">비로그인 상태</h2>
+        <h2 className="typo-common text-custom-black-light">비로그인 상태</h2>
         <button
           type="button"
           className={cn(
             'px-[24px] py-[8px]',
             'flex gap-[8px] items-center',
-            'cursor-pointer bg-white rounded-lg hover:bg-gray-300',
-            'typo-1 text-black-text',
+            'cursor-pointer rounded-lg hover:bg-custom-sidebar-hover',
+            'typo-common text-custom-black-light',
             'transition-color duration-100',
           )}>
           <LogIn className={cn('w-[20px] h-[20px]')} />
@@ -69,13 +65,13 @@ export default function Sidebar() {
       {/* 탭 추가 */}
       <div
         className={cn(
-          'w-full',
+          'w-full max-w-[254.33px]',
           'flex justify-between items-center',
-          'px-[5px] py-[5px] mb-[8px] rounded-lg hover:bg-gray-600',
+          'px-[5px] py-[5px] mb-[8px] rounded-lg hover:bg-custom-sidebar-hover',
         )}>
-        <div className={cn('flex gap-[8px] items-center')}>
-          <FolderOpen className={cn('w-[25px] h-[25px] text-gray-300')} />
-          <p className={cn('typo-1 text-gray-300')}>탭 목록</p>
+        <div className={cn('flex gap-[8px] items-center', 'text-custom-black-light')}>
+          <FolderOpen className={cn('w-[20px] h-[20px]')} />
+          <p className={cn('typo-common')}>탭 목록</p>
         </div>
         <TabButton />
       </div>

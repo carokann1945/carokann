@@ -24,11 +24,11 @@ export default function TabDropdownMenu({ tabName, onRename, onDelete }: TabDrop
           aria-label={`${tabName} 메뉴 열기`}
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            'w-[30px] h-[30px]',
+            'w-[28px] h-[28px]',
             'flex justify-center items-center shrink-0',
-            'md:opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100 data-[state=open]:bg-gray-600 hover:bg-gray-600',
+            'md:opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100 data-[state=open]:bg-custom-sidebar-hover-dark hover:bg-custom-sidebar-hover-dark',
             'cursor-pointer rounded-md',
-            'text-gray-300',
+            'text-custom-black-light',
           )}>
           <MoreHorizontal className={cn('w-[25px] h-[15px]')} />
         </button>

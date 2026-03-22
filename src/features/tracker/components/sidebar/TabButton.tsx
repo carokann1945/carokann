@@ -15,10 +15,10 @@ export default function TabButton() {
         type="button"
         onClick={() => setTabDialogOpen(true)}
         className={cn(
-          'w-[35px] h-[35px]',
+          'w-[26px] h-[26px]',
           'rounded-md',
           'cursor-pointer',
-          'hover:bg-gray-500',
+          'hover:bg-custom-sidebar-hover-dark',
           'transition-color duration-100',
         )}>
         +

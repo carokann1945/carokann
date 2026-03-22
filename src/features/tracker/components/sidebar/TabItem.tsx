@@ -38,12 +38,12 @@ export default function TabItem({ tab }: TabItemProps) {
         }}
         className={cn(
           'group w-full max-w-[255px]',
-          'py-[4px] pl-[10px]',
+          'py-[2px] pl-[6px]',
           'flex justify-between items-center',
           'rounded-md cursor-pointer',
           'typo-1 text-start text-gray-100',
-          !isActive && 'hover:bg-accent-light/10',
-          isActive ? 'bg-accent-light/10' : 'bg-none',
+          !isActive && 'hover:bg-custom-sidebar-hover',
+          isActive ? 'bg-custom-sidebar-hover' : 'bg-none',
           isDragging && 'relative z-10 bg-accent-light/10 shadow-sm ring-1 ring-white',
         )}>
         <div className={cn('min-w-0 flex items-center gap-[6px]')}>
@@ -58,11 +58,11 @@ export default function TabItem({ tab }: TabItemProps) {
               'w-[18px] h-[18px]',
               'flex justify-center items-center shrink-0',
               'cursor-grab active:cursor-grabbing touch-none',
-              'text-gray-300',
+              'text-custom-black-light',
             )}>
             <GripVertical className={cn('w-[14px] h-[14px]')} />
           </button>
-          <span className={cn('truncate')}>{tab.name}</span>
+          <span className={cn('truncate typo-common text-custom-black-light')}>{tab.name}</span>
         </div>
         <TabDropdownMenu
           tabName={tab.name}
