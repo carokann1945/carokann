@@ -27,18 +27,25 @@ const EMPTY_STATE: TabState = {
 function normalizeState(saved: TabState | null | undefined): TabState {
   const validated = saved && saved.version === 1 ? saved : EMPTY_STATE;
   const sorted = [...validated.tabs].sort((a, b) => a.position - b.position);
-  const activeExists = sorted.some((tab) => tab.id === validated.activeTabId);
+  const activeTabId =
+    validated.activeTabId === null
+      ? null
+      : sorted.some((tab) => tab.id === validated.activeTabId)
+        ? validated.activeTabId
+        : null;
 
   return {
     ...validated,
     tabs: sorted,
-    activeTabId: activeExists ? validated.activeTabId : (sorted[0]?.id ?? null),
+    activeTabId,
   };
 }
 
+export const selectActiveTab = (store: TabStore) =>
+  store.state.tabs.find((tab) => tab.id === store.state.activeTabId) ?? null;
+
 // 일반 함수 - 액티브 탭 이름 반환
-export const selectActiveTabName = (store: TabStore) =>
-  store.state.tabs.find((tab) => tab.id === store.state.activeTabId)?.name ?? '선택된 탭 없음';
+export const selectActiveTabName = (store: TabStore) => selectActiveTab(store)?.name ?? '선택된 탭 없음';
 
 export const useTabStore = create<TabStore>((set, get) => ({
   state: EMPTY_STATE,
@@ -77,7 +84,7 @@ export const useTabStore = create<TabStore>((set, get) => ({
   deleteTab: (tabId) =>
     set((store) => {
       const tabs = store.state.tabs.filter((tab) => tab.id !== tabId).map((tab, i) => ({ ...tab, position: i }));
-      const activeTabId = store.state.activeTabId === tabId ? (tabs[0]?.id ?? null) : store.state.activeTabId;
+      const activeTabId = store.state.activeTabId === tabId ? null : store.state.activeTabId;
 
       return {
         state: { ...store.state, tabs, activeTabId },

@@ -17,17 +17,17 @@ import {
 } from '@dnd-kit/sortable';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { useTabStore } from '../../model/tabStore';
+import { useTabStore, selectActiveTab } from '../../model/tabStore';
 import { useTaskStore } from '../../model/taskStore';
 import TaskItem from './TaskItem';
 
 export default function TaskList() {
-  const activeTabId = useTabStore((store) => store.state.activeTabId);
+  const activeTab = useTabStore(selectActiveTab);
   const taskState = useTaskStore((store) => store.state);
   const reorderTasks = useTaskStore((store) => store.reorderTasks);
 
-  const tasks = activeTabId
-    ? taskState.tasks.filter((task) => task.tabId === activeTabId).sort((a, b) => a.position - b.position)
+  const tasks = activeTab
+    ? taskState.tasks.filter((task) => task.tabId === activeTab.id).sort((a, b) => a.position - b.position)
     : [];
   const taskIds = tasks.map((task) => task.id);
 
@@ -39,16 +39,16 @@ export default function TaskList() {
   );
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
-    if (!activeTabId || !over || active.id === over.id) return;
+    if (!activeTab || !over || active.id === over.id) return;
 
     const oldIndex = taskIds.findIndex((taskId) => taskId === active.id);
     const newIndex = taskIds.findIndex((taskId) => taskId === over.id);
     if (oldIndex === -1 || newIndex === -1) return;
 
-    reorderTasks(activeTabId, arrayMove(taskIds, oldIndex, newIndex));
+    reorderTasks(activeTab.id, arrayMove(taskIds, oldIndex, newIndex));
   };
 
-  if (!activeTabId) {
+  if (!activeTab) {
     return (
       <div
         className={cn(

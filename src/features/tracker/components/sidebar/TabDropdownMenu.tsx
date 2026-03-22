@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
+import { cn, stopPropagation } from '@/lib/utils';
 
 type TabDropdownMenuProps = {
   tabName: string;
@@ -34,8 +34,12 @@ export default function TabDropdownMenu({ tabName, onRename, onDelete }: TabDrop
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={onRename}>수정</DropdownMenuItem>
-        <DropdownMenuItem onSelect={onDelete}>삭제</DropdownMenuItem>
+        <DropdownMenuItem onSelect={onRename} onClick={stopPropagation}>
+          수정
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={onDelete} onClick={stopPropagation}>
+          삭제
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
