@@ -20,3 +20,13 @@ model Profile {
   plan      String  @default("free")
   createdAt DateTime @default(now())
 }
+
+model TrackerSnapshot {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  tabState             Json
+  taskState            Json
+  migrationCompletedAt DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
