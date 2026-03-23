@@ -146,7 +146,7 @@ export default function TaskItem({ task }: { task: Task }) {
                   onKeyDown={stopPropagation}
                   className={cn(
                     'size-[24px] cursor-pointer border-gray-500',
-                    'data-[state=checked]:border-accent-blue data-[state=checked]:bg-accent-blue data-[state=checked]:text-white',
+                    'data-[state=checked]:border-custom-checkbox data-[state=checked]:bg-custom-checkbox data-[state=checked]:text-white',
                   )}
                 />
               ) : (
@@ -163,7 +163,7 @@ export default function TaskItem({ task }: { task: Task }) {
                     onKeyDown={stopPropagation}
                     className={cn(
                       'size-[24px] cursor-pointer border-gray-500',
-                      'data-[state=checked]:border-accent-blue data-[state=checked]:bg-accent-blue data-[state=checked]:text-white',
+                      'data-[state=checked]:border-custom-checkbox data-[state=checked]:bg-custom-checkbox data-[state=checked]:text-white',
                     )}
                   />
                 ))
