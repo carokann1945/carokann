@@ -31,7 +31,7 @@ export default function TrackerShell() {
           isOpen ? 'md:ml-[300px]' : 'md:ml-0',
         )}>
         <Header />
-        <main className={cn('flex-1 bg-gray-50 px-[16px] py-[20px] md:px-[24px]')}>
+        <main className={cn('flex-1 bg-custom-sidebar-bg px-[16px] py-[20px] md:px-[24px]')}>
           <TaskList />
         </main>
       </div>
