@@ -1,4 +1,9 @@
-import { PanelLeft, CircleUser, LogIn, FolderOpen } from 'lucide-react';
+import { PanelLeft, CircleUser, LogIn, LogOut, FolderOpen } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { signOut } from '@/actions/auth.actions';
+import { getProfile } from '@/actions/profile.actions';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useSidebarStore } from '../../model/sidebarStore';
@@ -8,6 +13,12 @@ import TabList from './TabList';
 export default function Sidebar() {
   const isOpen = useSidebarStore((store) => store.isOpen);
   const setIsOpen = useSidebarStore((store) => store.setIsOpen);
+  const router = useRouter();
+  const [profile, setProfile] = useState<Awaited<ReturnType<typeof getProfile>>>(null);
+
+  useEffect(() => {
+    getProfile().then(setProfile);
+  }, []);
 
   return (
     <aside
@@ -67,22 +78,75 @@ export default function Sidebar() {
           'border-t border-gray-300 shrink-0 px-[15px]',
         )}>
         <div className={cn('flex gap-[8px] items-center')}>
-          <figure>
-            <CircleUser className={cn('w-[40px] h-[40px] text-custom-black-light')} />
-          </figure>
+          {profile ? (
+            <>
+              <figure className={cn('relative w-[40px] h-[40px] rounded-full overflow-hidden')}>
+                <Image
+                  src={profile.avatarUrl}
+                  alt="profile image"
+                  sizes="40px"
+                  fill
+                  priority
+                  className="object-cover"
+                />
+              </figure>
+            </>
+          ) : (
+            <figure className={cn('relative w-[40px] h-[40px] rounded-full overflow-hidden')}>
+              <CircleUser className={cn('w-[40px] h-[40px] text-custom-black-light')} />
+            </figure>
+          )}
+
           <div className={cn('flex flex-col gap-[6px]', 'typo-common text-custom-black-light')}>
-            <span className={cn('text-[14px]')}>비로그인 상태</span>
-            <span className={cn('text-[12px] text-gray-400')}>무료 요금제</span>
+            {/* <span className={cn('text-[14px]')}>비로그인 상태</span>
+            <span className={cn('text-[12px] text-gray-400')}>무료 요금제</span> */}
+            {profile ? (
+              <>
+                <span className={cn('text-[14px]')}>{profile.name ?? profile.email}</span>
+                <span className={cn('text-[12px] text-gray-400')}>{profile.plan ?? 'free'}</span>
+              </>
+            ) : (
+              <>
+                <span className={cn('text-[14px]')}>비로그인 상태</span>
+                <span className={cn('text-[12px] text-gray-400')}>free</span>
+              </>
+            )}
           </div>
         </div>
-        <div
+        {/* <div
+          onClick={() => router.push('/login')}
           className={cn(
             'cursor-pointer w-[30px] h-[30px]',
             'flex justify-center items-center',
             'hover:bg-custom-sidebar-hover rounded-lg',
           )}>
           <LogIn className={cn('w-[20px] h-[20px] text-custom-black-light')} />
-        </div>
+        </div> */}
+        {profile ? (
+          // 로그아웃 버튼
+          <form action={signOut}>
+            <button
+              type="submit"
+              className={cn(
+                'cursor-pointer w-[30px] h-[30px]',
+                'flex justify-center items-center',
+                'hover:bg-custom-sidebar-hover rounded-lg',
+              )}>
+              <LogOut className={cn('w-[20px] h-[20px] text-custom-black-light')} />
+            </button>
+          </form>
+        ) : (
+          // 로그인 버튼
+          <div
+            onClick={() => router.push('/login')}
+            className={cn(
+              'cursor-pointer w-[30px] h-[30px]',
+              'flex justify-center items-center',
+              'hover:bg-custom-sidebar-hover rounded-lg',
+            )}>
+            <LogIn className={cn('w-[20px] h-[20px] text-custom-black-light')} />
+          </div>
+        )}
       </div>
     </aside>
   );

@@ -59,7 +59,14 @@ export default function TaskList() {
           'mx-auto',
         )}>
         <figure className={cn('relative w-[180px] h-[290px] md:w-[230px] md:h-[370px]')}>
-          <Image src="/images/herb.png" alt="have no tasks image" sizes="400px" fill className="object-cover" />
+          <Image
+            src="/images/herb.png"
+            alt="have no tasks image"
+            sizes="400px"
+            fill
+            className="object-cover"
+            priority
+          />
         </figure>
         <p className={cn('typo-first text-[26px] md:text-[32px] text-custom-black')}>선택된 탭이 없습니다.</p>
         <p className={cn('typo-common text-[14px] md:text-[16px] mt-[6px] text-custom-black-light')}>
@@ -80,7 +87,14 @@ export default function TaskList() {
           'mx-auto',
         )}>
         <figure className={cn('relative w-[180px] h-[290px] md:w-[230px] md:h-[370px]')}>
-          <Image src="/images/herb.png" alt="have no tasks image" sizes="400px" fill className="object-cover" />
+          <Image
+            src="/images/herb.png"
+            alt="have no tasks image"
+            sizes="400px"
+            fill
+            className="object-cover"
+            priority
+          />
         </figure>
         <p className={cn('typo-first text-[26px] md:text-[32px] text-custom-black')}>아직 작업이 없습니다.</p>
         <p className={cn('typo-common text-[14px] md:text-[16px] mt-[6px] text-custom-black-light')}>
