@@ -12,13 +12,12 @@ export default function TrackerShell() {
   const isOpen = useSidebarStore((store) => store.isOpen);
   const setIsOpen = useSidebarStore((store) => store.setIsOpen);
   const isMounted = useSidebarStore((store) => store.isMounted);
-  if (!isMounted) return null;
 
   return (
     <>
       <div className={cn('w-full min-h-dvh', 'flex')}>
         <Sidebar />
-        {isOpen && (
+        {isMounted && isOpen && (
           <div
             className="md:hidden fixed inset-0 bg-black/20 backdrop-blur-[2px] z-15 transition-opacity"
             onClick={() => setIsOpen(false)}
@@ -28,8 +27,8 @@ export default function TrackerShell() {
           className={cn(
             'flex-1 h-full',
             'flex flex-col',
-            'transition-all duration-300',
-            isOpen ? 'md:ml-[300px]' : 'md:ml-0',
+            isMounted ? 'transition-all duration-300' : 'transition-none',
+            isMounted ? (isOpen ? 'md:ml-[300px]' : 'md:ml-0') : 'md:ml-[300px]',
           )}>
           <Header />
           <main className={cn('flex-1 bg-custom-sidebar-bg px-[16px] py-[20px] md:px-[24px]')}>

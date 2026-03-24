@@ -25,6 +25,9 @@ export default function TaskList() {
   const activeTab = useTabStore(selectActiveTab);
   const taskState = useTaskStore((store) => store.state);
   const reorderTasks = useTaskStore((store) => store.reorderTasks);
+  const tabHydrated = useTabStore((store) => store.hydrated);
+  const taskHydrated = useTaskStore((store) => store.hydrated);
+  const isReady = tabHydrated && taskHydrated;
 
   const tasks = activeTab
     ? taskState.tasks.filter((task) => task.tabId === activeTab.id).sort((a, b) => a.position - b.position)
@@ -47,6 +50,10 @@ export default function TaskList() {
 
     reorderTasks(activeTab.id, arrayMove(taskIds, oldIndex, newIndex));
   };
+
+  if (!isReady) {
+    return <TaskListSkeleton />;
+  }
 
   if (!activeTab) {
     return (
@@ -121,6 +128,29 @@ export default function TaskList() {
           </ul>
         </SortableContext>
       </DndContext>
+    </div>
+  );
+}
+
+function TaskListSkeleton() {
+  return (
+    <div
+      className={cn(
+        'max-w-[1110px]',
+        'flex flex-col gap-[12px]',
+        'rounded-xl shadow-xl bg-white px-[16px] md:px-[32px] py-[16px] md:py-[32px] border border-gray-300',
+        'mx-auto',
+      )}>
+      {Array.from({ length: 1 }).map((_, index) => (
+        <div key={index} className="overflow-hidden rounded-lg border border-[#ebe4d8]">
+          <div className="h-[36px] animate-pulse bg-[#f6f2ea]" />
+          <div className="flex flex-col gap-[10px] px-[12px] py-[12px] sm:px-[16px] sm:py-[16px]">
+            <div className="h-[22px] w-[120px] animate-pulse rounded bg-[#ece7db]" />
+            <div className="h-[18px] w-[60%] animate-pulse rounded bg-[#ece7db]" />
+            <div className="h-[16px] w-[40%] animate-pulse rounded bg-[#f1eee6]" />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

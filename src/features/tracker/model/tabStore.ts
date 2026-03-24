@@ -8,6 +8,7 @@ import type { TabState, Tab } from './types';
 type TabStore = {
   state: TabState;
   hydrated: boolean;
+  dehydrate: () => void;
   hydrate: (saved: TabState | null) => void;
   addTab: (name: string) => void;
   renameTab: (tabId: string, name: string) => void;
@@ -51,6 +52,8 @@ export const useTabStore = create<TabStore>((set) => ({
       hydrated: true,
     });
   },
+
+  dehydrate: () => set({ hydrated: false }),
 
   addTab: (name) =>
     set((store) => {

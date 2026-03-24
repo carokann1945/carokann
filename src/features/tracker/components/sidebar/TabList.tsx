@@ -27,6 +27,8 @@ export default function TabList() {
   const tabs = state.tabs;
   const tabIds = tabs.map((tab) => tab.id);
 
+  const tabHydrated = useTabStore((store) => store.hydrated);
+
   // dnd-kit
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -44,6 +46,10 @@ export default function TabList() {
     reorderTabs(arrayMove(tabIds, oldIndex, newIndex));
   };
 
+  if (!tabHydrated) {
+    return <TabListSkeleton />;
+  }
+
   return (
     <div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -56,5 +62,17 @@ export default function TabList() {
         </SortableContext>
       </DndContext>
     </div>
+  );
+}
+
+function TabListSkeleton() {
+  return (
+    <ul className={cn('w-full', 'flex flex-col gap-[3px]')}>
+      {Array.from({ length: 1 }).map((_, index) => (
+        <li key={index} className={cn('w-full max-w-[275px]', 'px-[10px] py-[8px]', 'rounded-md bg-[#f1eee6]')}>
+          <div className="h-[18px] w-[70%] animate-pulse rounded bg-[#e0dbcf]" />
+        </li>
+      ))}
+    </ul>
   );
 }

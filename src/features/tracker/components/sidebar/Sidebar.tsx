@@ -14,6 +14,7 @@ export default function Sidebar() {
   const isOpen = useSidebarStore((store) => store.isOpen);
   const setIsOpen = useSidebarStore((store) => store.setIsOpen);
   const router = useRouter();
+  const isMounted = useSidebarStore((store) => store.isMounted);
   const [profile, setProfile] = useState<Awaited<ReturnType<typeof getProfile>>>(null);
 
   const handleSignOut = async () => {
@@ -42,9 +43,8 @@ export default function Sidebar() {
         'flex flex-col',
         'fixed top-0 left-0',
         'bg-[#faf9f4] text-custom-black border-r border-gray-300',
-        'translate-x-full',
-        'transition-transform duration-300',
-        isOpen ? 'translate-x-0' : '-translate-x-full',
+        isMounted ? 'transition-transform duration-300' : 'transition-none',
+        isMounted ? (isOpen ? 'translate-x-0' : '-translate-x-full') : '-translate-x-full md:translate-x-0',
       )}>
       {/* 사이트 로고 */}
       <div className={cn('w-full h-[40px]', 'flex justify-between items-center', 'mb-[30px] px-[15px] py-[25px]')}>

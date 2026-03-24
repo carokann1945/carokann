@@ -9,6 +9,7 @@ type TaskStore = {
   state: TaskState;
   hydrated: boolean;
   hydrate: (saved: TaskState | null) => void;
+  dehydrate: () => void;
   syncTasks: () => void;
   reorderTasks: (tabId: string, orderedIds: string[]) => void;
   addTask: (tabId: string, draft: TaskDraft) => void;
@@ -64,6 +65,8 @@ export const useTaskStore = create<TaskStore>((set) => ({
       hydrated: true,
     });
   },
+
+  dehydrate: () => set({ hydrated: false }),
 
   syncTasks: () => set((store) => ({ state: normalizeState(store.state) })),
 

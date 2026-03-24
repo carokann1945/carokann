@@ -24,6 +24,8 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
   const taskState = useTaskStore((store) => store.state);
   const hydrateTabs = useTabStore((store) => store.hydrate);
   const hydrateTasks = useTaskStore((store) => store.hydrate);
+  const tabDehydrate = useTabStore((store) => store.dehydrate);
+  const taskDehydrate = useTaskStore((store) => store.dehydrate);
 
   const [bootstrapped, setBootstrapped] = useState(false);
   const [mode, setMode] = useState<StorageMode>('local');
@@ -105,6 +107,9 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event: string) => {
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        // UI 깜빡임 방지를 위한 조치
+        tabDehydrate();
+        taskDehydrate();
         // 인증 상태가 바뀌면 bootstrap
         setBootstrapped(false);
         setAuthVersion((v) => v + 1);
@@ -114,7 +119,7 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [tabDehydrate, taskDehydrate]);
 
   // 2. authVersion이 바뀔 때마다 bootstrap 재실행
   useEffect(() => {
@@ -124,6 +129,9 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
       clearPendingSaveState();
       originalSnapshotRef.current = null;
       didHandleInitialHydrateRef.current = false;
+      tabDehydrate();
+      taskDehydrate();
+
       const localSnapshot = readLocalSnapshot();
 
       try {
