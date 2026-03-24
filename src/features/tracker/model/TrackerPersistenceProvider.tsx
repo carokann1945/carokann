@@ -23,8 +23,6 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
   const taskState = useTaskStore((store) => store.state);
   const hydrateTabs = useTabStore((store) => store.hydrate);
   const hydrateTasks = useTaskStore((store) => store.hydrate);
-  const resetTabs = useTabStore((store) => store.resetState);
-  const resetTasks = useTaskStore((store) => store.resetState);
 
   const [bootstrapped, setBootstrapped] = useState(false);
   const [mode, setMode] = useState<StorageMode>('local');
@@ -35,8 +33,16 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSavingRef = useRef(false);
   const pendingFlushRef = useRef(false);
+  // 초기 저장 여부를 결정하기 위한 원본 snapshot
+  const originalSnapshotRef = useRef<TrackerSnapshotPayload | null>(null);
+  const didHandleInitialHydrateRef = useRef(false);
 
   modeRef.current = mode;
+
+  function isSameSnapshot(a: TrackerSnapshotPayload, b: TrackerSnapshotPayload | null) {
+    if (!b) return false;
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
 
   const flushNow = useCallback(async () => {
     if (modeRef.current !== 'db') return;
@@ -90,19 +96,6 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
     pendingFlushRef.current = false;
   }, []);
 
-  const applyLocalSnapshot = useCallback(
-    (snapshot: TrackerSnapshotPayload) => {
-      resetTabs();
-      resetTasks();
-      setMode('local');
-      latestSnapshotRef.current = snapshot;
-      hydrateTabs(snapshot.tabState);
-      hydrateTasks(snapshot.taskState);
-      setBootstrapped(true);
-    },
-    [resetTabs, resetTasks, hydrateTabs, hydrateTasks],
-  );
-
   // 1. auth 상태 변화 감지
   useEffect(() => {
     const supabase = createClient();
@@ -110,14 +103,13 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event: string) => {
-      if (event === 'SIGNED_OUT') {
-        clearPendingSaveState();
-        applyLocalSnapshot(readLocalSnapshot());
-        setAuthVersion((v) => v + 1);
-        return;
-      }
-
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+      if (
+        event === 'SIGNED_IN' ||
+        event === 'SIGNED_OUT' ||
+        event === 'TOKEN_REFRESHED' ||
+        event === 'INITIAL_SESSION'
+      ) {
+        // 인증 상태가 바뀌면 bootstrap
         setBootstrapped(false);
         setAuthVersion((v) => v + 1);
       }
@@ -126,59 +118,35 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
     return () => {
       subscription.unsubscribe();
     };
-  }, [clearPendingSaveState, applyLocalSnapshot]);
+  }, []);
 
   // 2. authVersion이 바뀔 때마다 bootstrap 재실행
   useEffect(() => {
     let cancelled = false;
 
     async function runBootstrap() {
+      clearPendingSaveState();
+      originalSnapshotRef.current = null;
+      didHandleInitialHydrateRef.current = false;
       const localSnapshot = readLocalSnapshot();
 
       try {
         const result = await bootstrapTracker(localSnapshot);
         if (cancelled) return;
 
-        setMode(result.mode);
+        originalSnapshotRef.current = result.snapshot;
         latestSnapshotRef.current = result.snapshot;
-        hydrateTabs(result.snapshot.tabState);
-        hydrateTasks(result.snapshot.taskState);
-        setBootstrapped(true);
-      } catch {
-        if (cancelled) return;
 
-        setMode('local');
-        latestSnapshotRef.current = localSnapshot;
-        hydrateTabs(localSnapshot.tabState);
-        hydrateTasks(localSnapshot.taskState);
-        setBootstrapped(true);
-      }
-    }
-
-    void runBootstrap();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [authVersion, hydrateTabs, hydrateTasks]);
-
-  // 3.
-  useEffect(() => {
-    if (bootstrapped) return;
-    let cancelled = false;
-
-    async function runBootstrap() {
-      const localSnapshot = readLocalSnapshot();
-
-      try {
-        const result = await bootstrapTracker(localSnapshot);
-        if (cancelled) return;
         setMode(result.mode);
         hydrateTabs(result.snapshot.tabState);
         hydrateTasks(result.snapshot.taskState);
         setBootstrapped(true);
       } catch {
         if (cancelled) return;
+
+        originalSnapshotRef.current = localSnapshot;
+        latestSnapshotRef.current = localSnapshot;
+
         setMode('local');
         hydrateTabs(localSnapshot.tabState);
         hydrateTasks(localSnapshot.taskState);
@@ -191,13 +159,22 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
     return () => {
       cancelled = true;
     };
-  }, [bootstrapped, hydrateTabs, hydrateTasks]);
+  }, [clearPendingSaveState, authVersion, hydrateTabs, hydrateTasks]);
 
+  // 3. bootstrap이 끝난 뒤 최신 스냅샷으로 잡아두고, 로컬이면 바로 저장하고, db면 저장 예약함
   useEffect(() => {
     if (!bootstrapped) return;
 
     const snapshot = { tabState, taskState };
     latestSnapshotRef.current = snapshot;
+
+    if (!didHandleInitialHydrateRef.current) {
+      didHandleInitialHydrateRef.current = true;
+
+      if (isSameSnapshot(snapshot, originalSnapshotRef.current)) {
+        return;
+      }
+    }
 
     if (mode === 'local') {
       saveState(tabState);
@@ -231,7 +208,7 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
     };
   }, [flushNow, bootstrapped]);
 
-  // 4) repeat task 동기화
+  // 4) repeat task 자동 sync, 긴급 sync
   useEffect(() => {
     if (!bootstrapped) return;
 

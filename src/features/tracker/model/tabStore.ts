@@ -9,7 +9,6 @@ type TabStore = {
   state: TabState;
   hydrated: boolean;
   hydrate: (saved: TabState | null) => void;
-  resetState: () => void;
   addTab: (name: string) => void;
   renameTab: (tabId: string, name: string) => void;
   deleteTab: (tabId: string) => void;
@@ -50,13 +49,6 @@ export const useTabStore = create<TabStore>((set) => ({
     set({
       state: normalizeState(saved),
       hydrated: true,
-    });
-  },
-
-  resetState: () => {
-    set({
-      state: EMPTY_TAB_STATE,
-      hydrated: false,
     });
   },
 

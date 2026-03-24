@@ -41,7 +41,6 @@ export async function bootstrapTracker(localSnapshot: TrackerSnapshotPayload): P
     };
   }
 
-  // 최초 등록 마이그레이션 작업
   const snapshot = isEmptySnapshot(localSnapshot) ? createEmptySnapshot() : localSnapshot;
 
   await prisma.trackerSnapshot.create({
