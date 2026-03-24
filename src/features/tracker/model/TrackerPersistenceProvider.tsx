@@ -1,5 +1,6 @@
 'use client';
 
+import { isEqual } from 'es-toolkit';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { bootstrapTracker, saveTrackerSnapshot } from '@/actions/tracker.actions';
 import { createClient } from '@/lib/supabase/client';
@@ -37,12 +38,12 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
   const originalSnapshotRef = useRef<TrackerSnapshotPayload | null>(null);
   const didHandleInitialHydrateRef = useRef(false);
 
-  modeRef.current = mode;
-
   function isSameSnapshot(a: TrackerSnapshotPayload, b: TrackerSnapshotPayload | null) {
     if (!b) return false;
-    return JSON.stringify(a) === JSON.stringify(b);
+    return isEqual(a, b);
   }
+
+  modeRef.current = mode;
 
   const flushNow = useCallback(async () => {
     if (modeRef.current !== 'db') return;
@@ -103,12 +104,7 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event: string) => {
-      if (
-        event === 'SIGNED_IN' ||
-        event === 'SIGNED_OUT' ||
-        event === 'TOKEN_REFRESHED' ||
-        event === 'INITIAL_SESSION'
-      ) {
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
         // 인증 상태가 바뀌면 bootstrap
         setBootstrapped(false);
         setAuthVersion((v) => v + 1);
@@ -161,7 +157,7 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
     };
   }, [clearPendingSaveState, authVersion, hydrateTabs, hydrateTasks]);
 
-  // 3. bootstrap이 끝난 뒤 최신 스냅샷으로 잡아두고, 로컬이면 바로 저장하고, db면 저장 예약함
+  // 3. bootstrap이 끝난 뒤 최신 스냅샷으로 잡아두고, 로컬이면 바로 저장하고, db면 저장 예약함. 다만 원본과 다를 때만 쓰기 작업함
   useEffect(() => {
     if (!bootstrapped) return;
 
