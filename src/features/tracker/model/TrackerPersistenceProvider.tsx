@@ -26,12 +26,10 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
   const resetTabs = useTabStore((store) => store.resetState);
   const resetTasks = useTaskStore((store) => store.resetState);
 
-  // 앱 상태 준비 완료 플래그
   const [bootstrapped, setBootstrapped] = useState(false);
   const [mode, setMode] = useState<StorageMode>('local');
   const [authVersion, setAuthVersion] = useState(0);
 
-  const sourceKeyRef = useRef<string | null>(null);
   const modeRef = useRef<StorageMode>('local');
   const latestSnapshotRef = useRef<TrackerSnapshotPayload | null>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -40,8 +38,9 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
 
   modeRef.current = mode;
 
-  async function flushNow() {
+  const flushNow = useCallback(async () => {
     if (modeRef.current !== 'db') return;
+
     const snapshot = latestSnapshotRef.current;
     if (!snapshot) return;
 
@@ -67,18 +66,20 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
         void flushNow();
       }
     }
-  }
+  }, []);
 
-  function scheduleSave() {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+  const scheduleSave = useCallback(() => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+    }
+
     saveTimerRef.current = setTimeout(() => {
       saveTimerRef.current = null;
       void flushNow();
     }, 800);
-  }
+  }, [flushNow]);
 
-  // 저장 관련 내부 상태 전부 초기화
-  function clearPendingSaveState() {
+  const clearPendingSaveState = useCallback(() => {
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current);
       saveTimerRef.current = null;
@@ -87,15 +88,13 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
     latestSnapshotRef.current = null;
     isSavingRef.current = false;
     pendingFlushRef.current = false;
-  }
+  }, []);
 
-  // 로컬 스냅샷을 상태에 적용
   const applyLocalSnapshot = useCallback(
     (snapshot: TrackerSnapshotPayload) => {
       resetTabs();
       resetTasks();
       setMode('local');
-      sourceKeyRef.current = 'local:guest';
       latestSnapshotRef.current = snapshot;
       hydrateTabs(snapshot.tabState);
       hydrateTasks(snapshot.taskState);
@@ -104,7 +103,7 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
     [resetTabs, resetTasks, hydrateTabs, hydrateTasks],
   );
 
-  // auth 상태 변화 감지
+  // 1. auth 상태 변화 감지
   useEffect(() => {
     const supabase = createClient();
 
@@ -119,7 +118,6 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
       }
 
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
-        sourceKeyRef.current = null;
         setBootstrapped(false);
         setAuthVersion((v) => v + 1);
       }
@@ -128,9 +126,9 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
     return () => {
       subscription.unsubscribe();
     };
-  }, [applyLocalSnapshot, hydrateTabs, hydrateTasks, resetTabs, resetTasks]);
+  }, [clearPendingSaveState, applyLocalSnapshot]);
 
-  // authVersion이 바뀔 때마다 bootstrap 재실행
+  // 2. authVersion이 바뀔 때마다 bootstrap 재실행
   useEffect(() => {
     let cancelled = false;
 
@@ -141,7 +139,6 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
         const result = await bootstrapTracker(localSnapshot);
         if (cancelled) return;
 
-        sourceKeyRef.current = result.sourceKey;
         setMode(result.mode);
         latestSnapshotRef.current = result.snapshot;
         hydrateTabs(result.snapshot.tabState);
@@ -150,7 +147,6 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
       } catch {
         if (cancelled) return;
 
-        sourceKeyRef.current = 'local:fallback';
         setMode('local');
         latestSnapshotRef.current = localSnapshot;
         hydrateTabs(localSnapshot.tabState);
@@ -166,7 +162,9 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
     };
   }, [authVersion, hydrateTabs, hydrateTasks]);
 
+  // 3.
   useEffect(() => {
+    if (bootstrapped) return;
     let cancelled = false;
 
     async function runBootstrap() {
@@ -175,18 +173,12 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
       try {
         const result = await bootstrapTracker(localSnapshot);
         if (cancelled) return;
-
-        // if (sourceKeyRef.current === result.sourceKey && bootstrapped) return;
-
-        sourceKeyRef.current = result.sourceKey;
         setMode(result.mode);
         hydrateTabs(result.snapshot.tabState);
         hydrateTasks(result.snapshot.taskState);
         setBootstrapped(true);
       } catch {
         if (cancelled) return;
-
-        sourceKeyRef.current = 'local:fallback';
         setMode('local');
         hydrateTabs(localSnapshot.tabState);
         hydrateTasks(localSnapshot.taskState);
@@ -214,7 +206,7 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
     }
 
     scheduleSave();
-  }, [bootstrapped, mode, tabState, taskState]);
+  }, [scheduleSave, bootstrapped, mode, tabState, taskState]);
 
   useEffect(() => {
     if (!bootstrapped) return;
@@ -237,7 +229,7 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
       window.removeEventListener('pagehide', handlePageHide);
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [bootstrapped]);
+  }, [flushNow, bootstrapped]);
 
   // 4) repeat task 동기화
   useEffect(() => {

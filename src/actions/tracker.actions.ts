@@ -11,7 +11,6 @@ import { createClient } from '@/lib/supabase/server';
 
 export type BootstrapTrackerResult = {
   mode: 'local' | 'db';
-  sourceKey: string;
   snapshot: TrackerSnapshotPayload;
 };
 
@@ -24,7 +23,6 @@ export async function bootstrapTracker(localSnapshot: TrackerSnapshotPayload): P
   if (!user) {
     return {
       mode: 'local',
-      sourceKey: 'local:guest',
       snapshot: localSnapshot,
     };
   }
@@ -36,7 +34,6 @@ export async function bootstrapTracker(localSnapshot: TrackerSnapshotPayload): P
   if (existing) {
     return {
       mode: 'db',
-      sourceKey: `db:${user.id}`,
       snapshot: {
         tabState: existing.tabState as TabState,
         taskState: existing.taskState as TaskState,
@@ -44,6 +41,7 @@ export async function bootstrapTracker(localSnapshot: TrackerSnapshotPayload): P
     };
   }
 
+  // 최초 등록 마이그레이션 작업
   const snapshot = isEmptySnapshot(localSnapshot) ? createEmptySnapshot() : localSnapshot;
 
   await prisma.trackerSnapshot.create({
@@ -51,13 +49,11 @@ export async function bootstrapTracker(localSnapshot: TrackerSnapshotPayload): P
       userId: user.id,
       tabState: snapshot.tabState,
       taskState: snapshot.taskState,
-      migrationCompletedAt: new Date(),
     },
   });
 
   return {
     mode: 'db',
-    sourceKey: `db:${user.id}`,
     snapshot,
   };
 }
@@ -82,7 +78,6 @@ export async function saveTrackerSnapshot(snapshot: TrackerSnapshotPayload) {
       userId: user.id,
       tabState: snapshot.tabState,
       taskState: snapshot.taskState,
-      migrationCompletedAt: new Date(),
     },
   });
 

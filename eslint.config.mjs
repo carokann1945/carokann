@@ -3,6 +3,7 @@ import nextVitals from 'eslint-config-next/core-web-vitals';
 import nextTs from 'eslint-config-next/typescript';
 import prettierRecommended from 'eslint-config-prettier';
 import importPlugin from 'eslint-plugin-import';
+import reactCompiler from 'eslint-plugin-react-compiler';
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -19,8 +20,10 @@ const eslintConfig = defineConfig([
   {
     plugins: {
       import: importPlugin,
+      'react-compiler': reactCompiler,
     },
     rules: {
+      'react-compiler/react-compiler': 'error',
       'import/order': [
         'warn',
         {
