@@ -2,9 +2,9 @@ import { PanelLeft, CircleUser, LogIn, LogOut, FolderOpen } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { signOut } from '@/actions/auth.actions';
 import { getProfile } from '@/actions/profile.actions';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import { useSidebarStore } from '../../model/sidebarStore';
 import TabButton from './TabButton';
@@ -15,6 +15,21 @@ export default function Sidebar() {
   const setIsOpen = useSidebarStore((store) => store.setIsOpen);
   const router = useRouter();
   const [profile, setProfile] = useState<Awaited<ReturnType<typeof getProfile>>>(null);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error('로그아웃 실패:', error);
+      return;
+    }
+
+    setProfile(null);
+    router.push('/');
+    router.refresh();
+  };
 
   useEffect(() => {
     getProfile().then(setProfile);
@@ -113,28 +128,18 @@ export default function Sidebar() {
             )}
           </div>
         </div>
-        {/* <div
-          onClick={() => router.push('/login')}
-          className={cn(
-            'cursor-pointer w-[30px] h-[30px]',
-            'flex justify-center items-center',
-            'hover:bg-custom-sidebar-hover rounded-lg',
-          )}>
-          <LogIn className={cn('w-[20px] h-[20px] text-custom-black-light')} />
-        </div> */}
         {profile ? (
           // 로그아웃 버튼
-          <form action={signOut}>
-            <button
-              type="submit"
-              className={cn(
-                'cursor-pointer w-[30px] h-[30px]',
-                'flex justify-center items-center',
-                'hover:bg-custom-sidebar-hover rounded-lg',
-              )}>
-              <LogOut className={cn('w-[20px] h-[20px] text-custom-black-light')} />
-            </button>
-          </form>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className={cn(
+              'cursor-pointer w-[30px] h-[30px]',
+              'flex justify-center items-center',
+              'hover:bg-custom-sidebar-hover rounded-lg',
+            )}>
+            <LogOut className={cn('w-[20px] h-[20px] text-custom-black-light')} />
+          </button>
         ) : (
           // 로그인 버튼
           <div

@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { bootstrapTracker, saveTrackerSnapshot } from '@/actions/tracker.actions';
-import { createClient as createBrowserClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 import { EMPTY_TAB_STATE, EMPTY_TASK_STATE, type TrackerSnapshotPayload } from './persistence';
 import { loadState, saveState } from './tabStorage';
 import { useTabStore } from './tabStore';
@@ -26,8 +26,10 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
   const resetTabs = useTabStore((store) => store.resetState);
   const resetTasks = useTaskStore((store) => store.resetState);
 
+  // 앱 상태 준비 완료 플래그
   const [bootstrapped, setBootstrapped] = useState(false);
   const [mode, setMode] = useState<StorageMode>('local');
+  const [authVersion, setAuthVersion] = useState(0);
 
   const sourceKeyRef = useRef<string | null>(null);
   const modeRef = useRef<StorageMode>('local');
@@ -75,43 +77,94 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
     }, 800);
   }
 
-  // 버그
-  useEffect(() => {
-    const supabase = createBrowserClient();
+  // 저장 관련 내부 상태 전부 초기화
+  function clearPendingSaveState() {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event) => {
-      if (saveTimerRef.current) {
-        clearTimeout(saveTimerRef.current);
-        saveTimerRef.current = null;
-      }
+    latestSnapshotRef.current = null;
+    isSavingRef.current = false;
+    pendingFlushRef.current = false;
+  }
 
-      sourceKeyRef.current = null;
-      latestSnapshotRef.current = null;
-      pendingFlushRef.current = false;
-      isSavingRef.current = false;
-
-      if (event === 'SIGNED_OUT') {
-        const localSnapshot = readLocalSnapshot();
-
-        setMode('local');
-        hydrateTabs(localSnapshot.tabState);
-        hydrateTasks(localSnapshot.taskState);
-        setBootstrapped(true);
-        return;
-      }
-
+  // 로컬 스냅샷을 상태에 적용
+  const applyLocalSnapshot = useCallback(
+    (snapshot: TrackerSnapshotPayload) => {
       resetTabs();
       resetTasks();
       setMode('local');
-      setBootstrapped(false);
+      sourceKeyRef.current = 'local:guest';
+      latestSnapshotRef.current = snapshot;
+      hydrateTabs(snapshot.tabState);
+      hydrateTasks(snapshot.taskState);
+      setBootstrapped(true);
+    },
+    [resetTabs, resetTasks, hydrateTabs, hydrateTasks],
+  );
+
+  // auth 상태 변화 감지
+  useEffect(() => {
+    const supabase = createClient();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event: string) => {
+      if (event === 'SIGNED_OUT') {
+        clearPendingSaveState();
+        applyLocalSnapshot(readLocalSnapshot());
+        setAuthVersion((v) => v + 1);
+        return;
+      }
+
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+        sourceKeyRef.current = null;
+        setBootstrapped(false);
+        setAuthVersion((v) => v + 1);
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [hydrateTabs, hydrateTasks, resetTabs, resetTasks]);
+  }, [applyLocalSnapshot, hydrateTabs, hydrateTasks, resetTabs, resetTasks]);
+
+  // authVersion이 바뀔 때마다 bootstrap 재실행
+  useEffect(() => {
+    let cancelled = false;
+
+    async function runBootstrap() {
+      const localSnapshot = readLocalSnapshot();
+
+      try {
+        const result = await bootstrapTracker(localSnapshot);
+        if (cancelled) return;
+
+        sourceKeyRef.current = result.sourceKey;
+        setMode(result.mode);
+        latestSnapshotRef.current = result.snapshot;
+        hydrateTabs(result.snapshot.tabState);
+        hydrateTasks(result.snapshot.taskState);
+        setBootstrapped(true);
+      } catch {
+        if (cancelled) return;
+
+        sourceKeyRef.current = 'local:fallback';
+        setMode('local');
+        latestSnapshotRef.current = localSnapshot;
+        hydrateTabs(localSnapshot.tabState);
+        hydrateTasks(localSnapshot.taskState);
+        setBootstrapped(true);
+      }
+    }
+
+    void runBootstrap();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authVersion, hydrateTabs, hydrateTasks]);
 
   useEffect(() => {
     let cancelled = false;
@@ -123,7 +176,7 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
         const result = await bootstrapTracker(localSnapshot);
         if (cancelled) return;
 
-        if (sourceKeyRef.current === result.sourceKey && bootstrapped) return;
+        // if (sourceKeyRef.current === result.sourceKey && bootstrapped) return;
 
         sourceKeyRef.current = result.sourceKey;
         setMode(result.mode);
