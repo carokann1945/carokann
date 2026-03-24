@@ -163,7 +163,7 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
     return () => {
       cancelled = true;
     };
-  }, [clearPendingSaveState, authVersion, hydrateTabs, hydrateTasks]);
+  }, [tabDehydrate, taskDehydrate, clearPendingSaveState, authVersion, hydrateTabs, hydrateTasks]);
 
   // 3. bootstrap이 끝난 뒤 최신 스냅샷으로 잡아두고, 로컬이면 바로 저장하고, db면 저장 예약함. 다만 원본과 다를 때만 쓰기 작업함
   useEffect(() => {
