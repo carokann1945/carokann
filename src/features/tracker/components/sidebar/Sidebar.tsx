@@ -45,7 +45,7 @@ export default function Sidebar() {
         if (!isOpen) finishClosing();
       }}
       className={cn(
-        'z-20 w-[300px] h-screen',
+        'z-20 w-[300px] h-dvh',
         'flex flex-col',
         'fixed top-0 left-0',
         'bg-[#faf9f4] text-custom-black border-r border-gray-300',
