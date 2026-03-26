@@ -192,21 +192,13 @@ export default function TrackerPersistenceProvider({ children }: { children: Rea
   useEffect(() => {
     if (!bootstrapped) return;
 
-    const handleVisibility = () => {
-      if (document.visibilityState === 'hidden') {
-        void flushNow();
-      }
-    };
-
     const handlePageHide = () => {
       void flushNow();
     };
 
-    document.addEventListener('visibilitychange', handleVisibility);
     window.addEventListener('pagehide', handlePageHide);
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('pagehide', handlePageHide);
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
